@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dev
+
+resources:
+  - ../../base
+  - namespace.yaml
+  - ingress.yaml
+  - frontend-hpa.yaml
+  - productcatalog-hpa.yaml
+  - loadgenerator.yaml
+
+images:
+  - name: frontend
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/frontend
+    newTag: latest
+
+  - name: cartservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/cartservice
+    newTag: latest
+
+  - name: checkoutservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/checkoutservice
+    newTag: latest
+
+  - name: currencyservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/currencyservice
+    newTag: latest
+
+  - name: emailservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/emailservice
+    newTag: latest
+
+  - name: paymentservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/paymentservice
+    newTag: latest
+
+  - name: productcatalogservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/productcatalogservice
+    newTag: latest
+
+  - name: recommendationservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/recommendationservice
+    newTag: latest
+
+  - name: shippingservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/shippingservice
+    newTag: latest
+
+  - name: adservice
+    newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/adservice
+    newTag: latest
