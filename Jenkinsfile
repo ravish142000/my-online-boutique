@@ -18,6 +18,14 @@ pipeline {
             }
         }
 
+        stage('Unit Test') {
+            steps {
+                dir('src/frontend') {
+                    sh 'go test ./...'
+                }
+            }
+        }
+
     }
 
 }
