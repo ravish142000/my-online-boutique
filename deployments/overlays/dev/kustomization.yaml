@@ -9,7 +9,6 @@ resources:
   - ingress.yaml
   - frontend-hpa.yaml
   - productcatalog-hpa.yaml
-  - loadgenerator.yaml
 
 images:
   - name: frontend
