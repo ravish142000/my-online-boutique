@@ -87,7 +87,7 @@ spec:
           # - name: ENV_PLATFORM
           #   value: "aws"
           - name: ENABLE_PROFILER
-            value: "0"
+            value: "1"
           # - name: CYMBAL_BRANDING
           #   value: "true"
           # - name: ENABLE_ASSISTANT
