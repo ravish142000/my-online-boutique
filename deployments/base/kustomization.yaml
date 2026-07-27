@@ -12,4 +12,3 @@ resources:
   - productcatalogservice.yaml
   - recommendationservice.yaml
   - shippingservice.yaml
-  - prune-test.yaml
