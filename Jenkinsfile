@@ -17,6 +17,33 @@ pipeline {
             }
         }
 
+	stage('Git Debug') {
+ 	    steps {
+       	       sh '''
+            	  echo "===== GIT DEBUG ====="
+            	  pwd
+                  git status
+                  echo
+
+                  echo "Current branch:"
+                  git branch
+                  echo
+
+                  echo "All branches:"
+                  git branch -a
+                  echo
+
+                  echo "HEAD:"
+                  git rev-parse --abbrev-ref HEAD
+                  echo
+
+                  echo "Remote:"
+                  git remote -v
+                  echo
+        	 '''
+                } 
+         } 
+
         stage('Build Application') {
             steps {
                 dir('src/frontend') {
@@ -75,6 +102,13 @@ pipeline {
 
         stage('GitOps Update') {
             steps {
+
+                sh """
+                    echo "Checking out main branch..."
+                    git checkout main
+                    git pull origin main
+                """
+
                 sh """
                     export IMAGE_TAG=${IMAGE_TAG}
 
@@ -85,7 +119,7 @@ pipeline {
                 """
 
                 sh """
-                    echo "Verifying manifest changes..."
+                    echo "Manifest changes:"
                     git diff deployments/overlays/dev/kustomization.yaml
                 """
 
@@ -104,4 +138,20 @@ pipeline {
                 """
             }
         }
-  }
+
+    }
+
+    post {
+
+        success {
+            echo "Pipeline completed successfully."
+        }
+
+        failure {
+            echo "Pipeline failed."
+        }
+
+
+    }
+
+}
