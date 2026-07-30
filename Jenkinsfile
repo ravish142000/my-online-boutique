@@ -59,7 +59,6 @@ pipeline {
             steps {
                 sh """
                     docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
-
                     docker tag ${IMAGE_NAME}:latest ${ECR_REGISTRY}/${IMAGE_NAME}:latest
                 """
             }
@@ -69,12 +68,42 @@ pipeline {
             steps {
                 sh """
                     docker push ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
-
                     docker push ${ECR_REGISTRY}/${IMAGE_NAME}:latest
                 """
             }
         }
 
+        stage('GitOps Update') {
+            steps {
+                sh """
+                    export IMAGE_TAG=${IMAGE_TAG}
+
+                    echo "Updating GitOps manifest..."
+
+                    yq -i '(.images[] | select(.name == "frontend")).newTag = env(IMAGE_TAG)' \
+                    deployments/overlays/dev/kustomization.yaml
+                """
+
+                sh """
+                    echo "Verifying manifest changes..."
+                    git diff deployments/overlays/dev/kustomization.yaml
+                """
+
+                sh """
+                    git config user.name "Jenkins CI"
+                    git config user.email "jenkins@example.local"
+
+                    git add deployments/overlays/dev/kustomization.yaml
+
+                    if git diff --cached --quiet; then
+                        echo "No manifest changes detected."
+                    else
+                        git commit -m "Update frontend image to ${IMAGE_TAG}"
+                        git push origin main
+                    fi
+                """
+            }
+        }
     }
 
     post {
@@ -90,7 +119,5 @@ pipeline {
         always {
             cleanWs()
         }
-
     }
-
 }
