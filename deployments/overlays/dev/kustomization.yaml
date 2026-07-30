@@ -10,7 +10,7 @@ resources:
 images:
   - name: frontend
     newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/frontend
-    newTag: build-16
+    newTag: build-17
   - name: cartservice
     newName: 811822680488.dkr.ecr.us-east-1.amazonaws.com/cartservice
     newTag: latest
