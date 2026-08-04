@@ -17,6 +17,33 @@ pipeline {
             }
         }
 
+        stage('Git Debug') {
+            steps {
+                sh '''
+                    echo "===== GIT DEBUG ====="
+                    pwd
+                    git status
+                    echo
+
+                    echo "Current branch:"
+                    git branch
+                    echo
+
+                    echo "All branches:"
+                    git branch -a
+                    echo
+
+                    echo "HEAD:"
+                    git rev-parse --abbrev-ref HEAD
+                    echo
+
+                    echo "Remote:"
+                    git remote -v
+                    echo
+                '''
+            }
+        }
+
         stage('Build Application') {
             steps {
                 dir('src/frontend') {
@@ -46,10 +73,7 @@ pipeline {
 
         stage('Login to Amazon ECR') {
             steps {
-                withCredentials([[
-                    \$class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws_creds'
-                ]]) {
+                withAWS(credentials: 'aws_creds', region: "${AWS_REGION}") {
                     sh """
                         aws ecr get-login-password --region ${AWS_REGION} | \
                         docker login \
@@ -71,10 +95,12 @@ pipeline {
 
         stage('Push Docker Image to Amazon ECR') {
             steps {
-                sh """
-                    docker push ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
-                    docker push ${ECR_REGISTRY}/${IMAGE_NAME}:latest
-                """
+                withAWS(credentials: 'aws_creds', region: "${AWS_REGION}") {
+                    sh """
+                        docker push ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${IMAGE_NAME}:latest
+                    """
+                }
             }
         }
 
@@ -82,6 +108,7 @@ pipeline {
             steps {
 
                 sh """
+                    echo "Checking out main branch..."
                     git checkout main
                     git pull origin main
                 """
@@ -89,8 +116,15 @@ pipeline {
                 sh """
                     export IMAGE_TAG=${IMAGE_TAG}
 
+                    echo "Updating GitOps manifest..."
+
                     yq -i '(.images[] | select(.name == "frontend")).newTag = env(IMAGE_TAG)' \
                     deployments/overlays/dev/kustomization.yaml
+                """
+
+                sh """
+                    echo "Manifest changes:"
+                    git diff deployments/overlays/dev/kustomization.yaml
                 """
 
                 sh """
@@ -108,9 +142,11 @@ pipeline {
                 """
             }
         }
+
     }
 
     post {
+
         success {
             echo "Pipeline completed successfully."
         }
@@ -118,5 +154,7 @@ pipeline {
         failure {
             echo "Pipeline failed."
         }
+
     }
+
 }
