@@ -13,7 +13,7 @@ resources:
 images:
   - name: frontend
     newName: 001634075226.dkr.ecr.us-east-1.amazonaws.com/frontend
-    newTag: INVALID-TAG
+    newTag: build-4
 
   - name: cartservice
     newName: 001634075226.dkr.ecr.us-east-1.amazonaws.com/cartservice
